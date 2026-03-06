@@ -57,9 +57,12 @@
     <div class="test-card">
         <h3>🧪 Connection Tests</h3>
         <button onclick="testHealth()">Test Health Endpoint</button>
-        <button onclick="testSignup()">Test Signup Endpoint</button>
-        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="testSignup()">Test Complete Signup Flow</button>
+        <button onclick="testLogin()">Test Existing Login</button>
         <button onclick="clearLogs()">Clear Logs</button>
+        <p style="margin-top: 10px; font-size: 12px; color: #666;">
+            <strong>Note:</strong> Signup test will automatically test login with the new account and dashboard access.
+        </p>
     </div>
 
     <div id="results"></div>
@@ -135,7 +138,11 @@
                 if (response.ok) {
                     const data = await response.json();
                     log(`✅ Signup test successful: ${JSON.stringify(data)}`, 'success');
-                    showResult('Signup Test', `Signup endpoint working! Response: ${JSON.stringify(data)}`, true);
+                    showResult('Signup Test', `Signup endpoint working! User created: ${testData.email}`, true);
+                    
+                    // Test login with the same credentials
+                    log('🔍 Now testing login with new account...');
+                    await testLoginWithCredentials(testData.email, testData.password);
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     log(`❌ Signup test failed: ${JSON.stringify(errorData)}`, 'error');
@@ -148,12 +155,13 @@
         }
 
         async function testLogin() {
+            await testLoginWithCredentials('final@test.com', 'test');
+        }
+
+        async function testLoginWithCredentials(email, password) {
             log('🔍 Testing login endpoint...');
             try {
-                const testData = {
-                    email: 'final@test.com',
-                    password: 'test'
-                };
+                const testData = { email, password };
                 
                 log(`Sending login request: ${JSON.stringify({ ...testData, password: '***' })}`);
                 const response = await fetch(`${API_BASE_URL}/auth/login`, {
@@ -169,7 +177,13 @@
                 if (response.ok) {
                     const data = await response.json();
                     log(`✅ Login test successful: ${JSON.stringify(data)}`, 'success');
-                    showResult('Login Test', `Login endpoint working! Response: ${JSON.stringify(data)}`, true);
+                    showResult('Login Test', `Login successful for: ${email}`, true);
+                    
+                    // Test dashboard access with token
+                    if (data.data && data.data.access_token) {
+                        log('🔍 Testing dashboard access with token...');
+                        await testDashboardAccess(data.data.access_token);
+                    }
                 } else {
                     const errorData = await response.json().catch(() => ({}));
                     log(`❌ Login test failed: ${JSON.stringify(errorData)}`, 'error');
@@ -178,6 +192,32 @@
             } catch (error) {
                 log(`❌ Login test error: ${error.message}`, 'error');
                 showResult('Login Test', `Network error: ${error.message}`, false);
+            }
+        }
+
+        async function testDashboardAccess(token) {
+            try {
+                const response = await fetch(`${API_BASE_URL}/user/current`, {
+                    method: 'GET',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                log(`Dashboard access response: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Dashboard access successful: ${JSON.stringify(data)}`, 'success');
+                    showResult('Dashboard Test', `Authenticated access working! User: ${data.data?.email || 'Unknown'}`, true);
+                } else {
+                    log(`❌ Dashboard access failed: ${response.status}`, 'error');
+                    showResult('Dashboard Test', `Authentication failed: ${response.status}`, false);
+                }
+            } catch (error) {
+                log(`❌ Dashboard access error: ${error.message}`, 'error');
+                showResult('Dashboard Test', `Network error: ${error.message}`, false);
             }
         }
 
