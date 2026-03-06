@@ -13,7 +13,7 @@ export ENVIRONMENT=production
 
 # Bind to all interfaces so Nginx or external clients can reach the app
 HOST="${HOST:-0.0.0.0}"
-PORT="${PORT:-8000}"
+PORT="${PORT:-2000}"  # Changed from 8000 to 2000
 WORKERS="${WORKERS:-2}"
 
 exec gunicorn app.main:app \

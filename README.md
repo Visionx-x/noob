@@ -9,7 +9,7 @@ Mobile habit tracking app (Capacitor + Next.js) with FastAPI backend.
 ```bash
 pip install -r requirements.txt
 cp .env.example .env   # edit as needed
-py -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+py -m uvicorn app.main:app --host 0.0.0.0 --port 2000 --reload
 ```
 
 ### Frontend + Android
@@ -17,7 +17,7 @@ py -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 ```bash
 cd frontend
 npm install
-# For local testing: set NEXT_PUBLIC_API_URL=http://YOUR_PC_IP:8000/api in .env.local
+# For local testing: set NEXT_PUBLIC_API_URL=http://YOUR_PC_IP:2000/api in .env.local
 npm run mobile:build
 
 cd android
@@ -75,7 +75,7 @@ Edit `.env` file with production settings:
 ENVIRONMENT=production
 SECRET_KEY=your_super_secret_key_change_this_32_chars_minimum
 HOST=0.0.0.0
-PORT=8000
+PORT=2000
 DATABASE_URL=sqlite:///./growthforge.db
 ALLOWED_ORIGINS=https://yourdomain.com,http://localhost:3000,capacitor://localhost
 ALLOWED_HOSTS=yourdomain.com,www.yourdomain.com
@@ -104,7 +104,7 @@ Add this content:
 
 ```ini
 [program:growthforge]
-command=/var/www/growthforge/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+command=/var/www/growthforge/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 2000
 directory=/var/www/growthforge
 user=www-data
 autostart=true
@@ -138,7 +138,7 @@ server {
     server_name yourdomain.com www.yourdomain.com;
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:2000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -184,7 +184,7 @@ sudo supervisorctl status growthforge
 tail -f /var/log/growthforge.log
 
 # Test API
-curl -X GET http://localhost:8000/api/health
+curl -X GET http://localhost:2000/api/health
 ```
 
 ## Default Users
@@ -251,7 +251,7 @@ sudo tail -f /var/log/nginx/error.log
 
 1. **Service won't start**: Check logs with `sudo supervisorctl status growthforge`
 2. **Database errors**: Ensure SQLite file has proper permissions
-3. **Port conflicts**: Make sure port 8000 is not in use
+3. **Port conflicts**: Make sure port 2000 is not in use
 4. **Permission issues**: Run `sudo chown -R www-data:www-data /var/www/growthforge`
 
 ### Performance Optimization

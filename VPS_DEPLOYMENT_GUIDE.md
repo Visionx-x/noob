@@ -73,7 +73,7 @@ nano .env
 # Basic Settings
 ENVIRONMENT=production
 HOST=0.0.0.0
-PORT=8000
+PORT=2000
 
 # Database (SQLite for simplicity, upgrade to PostgreSQL later)
 DATABASE_URL=sqlite:///./growthforge.db
@@ -142,7 +142,7 @@ sudo nano /etc/supervisor/conf.d/growthforge.conf
 ### Add this configuration:
 ```ini
 [program:growthforge]
-command=/home/growthforge/app/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 8000
+command=/home/growthforge/app/venv/bin/python -m uvicorn app.main:app --host 0.0.0.0 --port 2000
 directory=/home/growthforge/app
 user=growthforge
 autostart=true
@@ -180,7 +180,7 @@ server {
     server_name YOUR_DOMAIN.com www.YOUR_DOMAIN.com;
 
     location / {
-        proxy_pass http://127.0.0.1:8000;
+        proxy_pass http://127.0.0.1:2000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
@@ -232,7 +232,7 @@ sudo ufw enable
 ### Test API
 ```bash
 # Test health endpoint
-curl -X GET http://localhost:8000/api/health
+curl -X GET http://localhost:2000/api/health
 
 # Test from external
 curl -X GET https://YOUR_DOMAIN.com/api/health
@@ -327,7 +327,7 @@ sudo tail -f /var/log/nginx/access.log
 
 3. **Port conflicts**
    ```bash
-   sudo netstat -tulpn | grep :8000
+   sudo netstat -tulpn | grep :2000
    ```
 
 4. **Nginx configuration errors**
@@ -370,7 +370,7 @@ if ! supervisorctl status growthforge | grep -q "RUNNING"; then
 fi
 
 # Check if API is responding
-if ! curl -f -s http://localhost:8000/api/health > /dev/null; then
+if ! curl -f -s http://localhost:2000/api/health > /dev/null; then
     echo "API health check failed!"
 fi
 ```

@@ -31,8 +31,8 @@ Create or edit `.env` in the **project root** (same folder as `app/`):
 ENVIRONMENT=production
 SECRET_KEY=your-32-char-or-longer-secret-key-use-openssl-rand-hex-32
 
-# Optional: bind port (default 8000)
-PORT=8000
+# Optional: bind port (default 2000)
+PORT=2000
 
 # CORS: comma-separated. Must include capacitor://localhost for the mobile app.
 # Add your API domain when you use HTTPS (e.g. https://api.yourdomain.com)
@@ -63,7 +63,7 @@ chmod +x deploy/run_production.sh
 
 ```bash
 export ENVIRONMENT=production
-gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:2000
 ```
 
 **Option C – run in background (systemd)**
@@ -80,7 +80,7 @@ User=www-data
 WorkingDirectory=/path/to/growthforge
 Environment="ENVIRONMENT=production"
 EnvironmentFile=/path/to/growthforge/.env
-ExecStart=/path/to/growthforge/.venv/bin/gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+ExecStart=/path/to/growthforge/.venv/bin/gunicorn app.main:app --workers 2 --worker-class uvicorn.workers.UvicornWorker --bind 0.0.0.0:2000
 Restart=always
 
 [Install]
@@ -103,7 +103,7 @@ sudo systemctl status growthforge-api
 Put Nginx (or Caddy) in front and use HTTPS:
 
 - Point a domain (e.g. `api.yourdomain.com`) to your VPS IP.
-- In Nginx, proxy to `http://127.0.0.1:8000`.
+- In Nginx, proxy to `http://127.0.0.1:2000`.
 - Use Let’s Encrypt for SSL.
 
 Then set in `.env`:
@@ -118,7 +118,7 @@ Then set in `.env`:
 When building the app for production, set the API URL to your VPS:
 
 - If using HTTPS: `https://api.yourdomain.com/api`
-- If using IP only: `http://YOUR_VPS_IP:8000/api`
+- If using IP only: `http://YOUR_VPS_IP:2000/api`
 
 In the frontend project:
 

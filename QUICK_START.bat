@@ -50,7 +50,7 @@ echo The server will start in a new window.
 echo Keep it running while you install the mobile app.
 echo.
 
-start "GrowthForge Backend" cmd /k "py -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload"
+start "GrowthForge Backend" cmd /k "py -m uvicorn app.main:app --host 0.0.0.0 --port 2000 --reload"
 
 REM Wait for server to start
 echo Waiting for server to start...
@@ -59,7 +59,7 @@ timeout /t 5 /nobreak >nul
 REM Step 4: Test server
 echo.
 echo Step 4: Testing server connection...
-curl -f http://localhost:8000/api/health >nul 2>&1
+curl -f http://localhost:2000/api/health >nul 2>&1
 if errorlevel 1 (
     echo ❌ Server not responding. Please check the server window.
     pause
@@ -87,7 +87,7 @@ echo 🔐 Login Credentials:
 echo    Admin: admin@growthforge.app / Admin123!@#
 echo    Test:  test@growthforge.app / Test123!@#
 echo.
-echo 🌐 Backend: http://localhost:8000
+echo 🌐 Backend: http://localhost:2000
 echo 📱 Mobile App: Installing on your device...
 echo.
 echo 📋 Next Steps:

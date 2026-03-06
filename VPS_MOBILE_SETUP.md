@@ -61,7 +61,7 @@ The mobile app needs to point to your VPS:
 NEXT_PUBLIC_API_URL=https://yourdomain.com/api
 
 // For local testing
-// NEXT_PUBLIC_API_URL=http://YOUR_PC_IP:8000/api
+// NEXT_PUBLIC_API_URL=http://YOUR_PC_IP:2000/api
 ```
 
 ### Backend CORS Configuration

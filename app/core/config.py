@@ -6,7 +6,7 @@ import secrets
 class Settings(BaseSettings):
     environment: str = "development"
     host: str = "0.0.0.0"
-    port: int = 8000
+    port: int = 2000  # Changed from 8000 to 2000
 
     database_url: str = "sqlite:///./growthforge.db"
 
