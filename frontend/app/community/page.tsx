@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
-import { ArrowLeft, Users, Trophy, TrendingUp, Award, Crown, Activity, CheckCircle, Settings } from 'lucide-react'
+import { ArrowLeft, Users, Trophy, TrendingUp, Award, Crown, Activity, CheckCircle, Settings, Target } from 'lucide-react'
 import api from '@/lib/api'
 
 export default function CommunityPage() {

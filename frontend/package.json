@@ -4,6 +4,7 @@
   "private": true,
   "description": "GrowthForge Mobile App - Professional Habit Tracking",
   "scripts": {
+    "build": "next build",
     "mobile:build": "next build && npx cap sync",
     "mobile:dev": "next build && npx cap sync && npx cap run android",
     "mobile:studio": "next build && npx cap sync && npx cap open android",
