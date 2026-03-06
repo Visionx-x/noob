@@ -65,7 +65,7 @@ export function ConnectionStatus() {
             <span>❌ Connection Error: {status.error}</span>
             <button 
               onClick={checkConnection}
-              className="ml-2 underline"
+              className="ml-2 underline text-white hover:text-yellow-300 transition-colors"
             >
               Retry
             </button>
