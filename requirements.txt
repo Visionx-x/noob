@@ -1,14 +1,28 @@
+# FastAPI and ASGI server
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
+
+# Production server
 gunicorn>=21.0.0
-alembic
-python-dotenv
+
+# Database
 sqlalchemy
-psycopg2-binary
+alembic
+
+# Environment configuration
+python-dotenv
 pydantic-settings
-email-validator
-passlib
+
+# Security and Authentication
+passlib[bcrypt]
 python-jose[cryptography]
 python-multipart
-redis
+
+# Rate limiting
 slowapi
+
+# Optional: PostgreSQL (uncomment if using PostgreSQL in production)
+# psycopg2-binary
+
+# Optional: Redis (uncomment if using Redis for caching)
+# redis
