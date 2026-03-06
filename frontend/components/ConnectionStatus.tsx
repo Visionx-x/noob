@@ -50,30 +50,6 @@ export function ConnectionStatus() {
     }
   }
 
-  // Only show in development or when there's an issue
-  if (status.isConnected && !status.isChecking && !status.error) {
-    return null
-  }
-
-  return (
-    <div className="fixed top-0 left-0 right-0 z-50 bg-red-500 text-white p-2 text-center">
-      <div className="container-mobile">
-        {status.isChecking ? (
-          <span>🔄 Checking connection...</span>
-        ) : status.error ? (
-          <div>
-            <span>❌ Connection Error: {status.error}</span>
-            <button 
-              onClick={checkConnection}
-              className="ml-2 underline text-white hover:text-yellow-300 transition-colors"
-            >
-              Retry
-            </button>
-          </div>
-        ) : (
-          <span>✅ Connected</span>
-        )}
-      </div>
-    </div>
-  )
+  // Don't show UI - only log to console for debugging
+  return null
 }

@@ -77,6 +77,71 @@ class ApiHelper {
     }
   }
 
+  async request(endpoint, config = {}) {
+    console.log(`📡 API REQUEST: ${config.method || 'GET'} ${endpoint}`)
+    console.log('📡 Request config:', config)
+    
+    const url = `${this.baseURL}${endpoint}`
+    console.log('📡 Full URL:', url)
+    
+    const defaultConfig = {
+      headers: {
+        'Content-Type': 'application/json',
+        ...(this.token && { Authorization: `Bearer ${this.token}` }),
+        ...config.headers,
+      },
+    }
+    
+    const finalConfig = { ...defaultConfig, ...config }
+    console.log('📡 Final config:', finalConfig)
+    
+    try {
+      console.log('📡 Sending fetch request...')
+      const response = await fetch(url, finalConfig)
+      
+      console.log('📡 Response received:', {
+        status: response.status,
+        statusText: response.statusText,
+        ok: response.ok,
+        url: response.url
+      })
+      
+      if (!response.ok) {
+        console.log('📡 Response not OK, parsing error...')
+        let errorData
+        try {
+          errorData = await response.json()
+          console.log('📡 Error data:', errorData)
+        } catch (e) {
+          console.log('📡 Could not parse error JSON, using text')
+          errorData = { message: await response.text() }
+        }
+        
+        const errorMessage = errorData.error || errorData.message || `HTTP ${response.status}: ${response.statusText}`
+        console.log('📡 Throwing error:', errorMessage)
+        throw new Error(errorMessage)
+      }
+      
+      console.log('📡 Parsing successful response...')
+      const data = await response.json()
+      console.log('📡 Response data:', data)
+      return data
+    } catch (error) {
+      console.log('❌ API REQUEST FAILED:', error)
+      console.log('❌ Error details:', {
+        message: error.message,
+        name: error.name,
+        stack: error.stack
+      })
+      mobileDebugger.error('API Request Failed', {
+        endpoint,
+        error: error.message,
+        url: url
+      })
+      throw error
+    }
+  }
+
   // Load token from localStorage (mobile compatible)
   loadToken() {
     if (typeof window !== 'undefined' && window.localStorage) {

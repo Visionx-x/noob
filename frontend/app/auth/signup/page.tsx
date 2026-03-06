@@ -51,30 +51,47 @@ export default function SignupPage() {
     }
 
     try {
-      console.log('Attempting signup with:', { email })
+      console.log('🔍 Attempting signup with:', { email, password: '***' })
+      
+      // First test connection
+      console.log('📡 Testing API connection before signup...')
+      const isConnected = await api.testConnection()
+      console.log('📡 Connection test result:', isConnected)
+      
+      if (!isConnected) {
+        setError('Cannot connect to server. Please check your internet connection.')
+        setIsLoading(false)
+        return
+      }
+      
+      console.log('🚀 Calling API signup...')
       const response = await api.signup({ email, password })
       
-      console.log('Signup response:', response)
+      console.log('✅ Signup response received:', response)
       
       if (response.success) {
-        console.log('Signup successful, redirecting to dashboard')
+        console.log('🎉 Signup successful, redirecting to dashboard')
         router.push('/dashboard')
       } else {
-        console.error('Signup failed:', response)
+        console.error('❌ Signup failed:', response)
         setError(response.error || response.message || 'Signup failed. Please try again.')
       }
     } catch (err) {
-      console.error('Signup error:', err)
+      console.error('❌ Signup error caught:', err)
       const msg = (err instanceof Error ? err.message : String(err)) || ''
-      // Better error handling
-      if (msg.includes('Failed to fetch')) {
-        setError('Network error. Please check your connection and try again.')
-      } else if (msg.includes('409')) {
+      console.log('🔍 Error message:', msg)
+      
+      // Enhanced error handling
+      if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('ERR_NETWORK')) {
+        setError('Network error. Please check your internet connection and try again.')
+      } else if (msg.includes('409') || msg.includes('already exists')) {
         setError('An account with this email already exists.')
-      } else if (msg.includes('400')) {
+      } else if (msg.includes('400') || msg.includes('Invalid')) {
         setError('Invalid input. Please check your information and try again.')
-      } else if (msg.includes('500')) {
+      } else if (msg.includes('500') || msg.includes('Server')) {
         setError('Server error. Please try again later.')
+      } else if (msg.includes('CORS')) {
+        setError('Connection blocked by browser. Please try again or contact support.')
       } else {
         setError(msg || 'An error occurred. Please try again.')
       }
