@@ -17,12 +17,7 @@ class Settings(BaseSettings):
     refresh_token_expire_days: int = 30
 
     # CORS: comma-separated list. Mobile app uses capacitor://localhost; add your VPS domain for web later.
-    allowed_origins: str = (
-        "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,"
-        "capacitor://localhost,https://localhost,http://localhost,"
-        "http://77.90.6.237:3000,http://77.90.6.237:2000,"
-        "capacitor://localhost,http://localhost,*"
-    )
+    allowed_origins: str = "*"  # Allow all origins for testing
     log_level: str = "INFO"
 
     # Production: comma-separated hosts for TrustedHostMiddleware (e.g. api.yourdomain.com). Leave empty to allow any host.
