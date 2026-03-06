@@ -19,7 +19,9 @@ class Settings(BaseSettings):
     # CORS: comma-separated list. Mobile app uses capacitor://localhost; add your VPS domain for web later.
     allowed_origins: str = (
         "http://localhost:3000,http://localhost:3001,http://127.0.0.1:3000,"
-        "capacitor://localhost,https://localhost,http://localhost"
+        "capacitor://localhost,https://localhost,http://localhost,"
+        "http://77.90.6.237:3000,http://77.90.6.237:2000,"
+        "capacitor://localhost,http://localhost,*"
     )
     log_level: str = "INFO"
 

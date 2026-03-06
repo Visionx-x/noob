@@ -10,7 +10,7 @@ const nextConfig = {
   assetPrefix: process.env.NODE_ENV === 'production' ? '.' : undefined,
   // NEXT_PUBLIC_API_URL: set in .env.local (dev: http://YOUR_PC_IP:8000/api, prod: https://api.yourdomain.com/api)
   env: {
-    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://77.90.6.237:2000/api'
+    NEXT_PUBLIC_API_URL: process.env.NEXT_PUBLIC_API_URL || 'http://77.90.6.237:8000/api'
   },
   eslint: { ignoreDuringBuilds: true },
   compiler: {

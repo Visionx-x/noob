@@ -5,7 +5,7 @@ import mobileDebugger from './mobile-debugger.js'
 function getApiBaseUrl() {
   const url =
     (typeof process !== 'undefined' && process.env && process.env.NEXT_PUBLIC_API_URL) ||
-    'http://77.90.6.237:2000/api'  // Updated to your VPS IP and port
+    'http://77.90.6.237:8000/api'  // Updated to your VPS IP and correct backend port
   const base = url.replace(/\/+$/, '') // no trailing slash
   if (typeof window !== 'undefined') {
     console.log('Mobile App API Configuration:', { baseURL: base })
