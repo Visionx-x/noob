@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">GrowthForge</string>
+    <string name="title_activity_main">GrowthForge</string>
+    <string name="package_name">com.growthforge.app</string>
+    <string name="custom_url_scheme">com.growthforge.app</string>
+</resources>

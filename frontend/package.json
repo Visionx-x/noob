@@ -1,0 +1,50 @@
+{
+  "name": "growthforge-mobile",
+  "version": "1.0.0",
+  "private": true,
+  "description": "GrowthForge Mobile App - Professional Habit Tracking",
+  "scripts": {
+    "mobile:build": "next build && npx cap sync",
+    "mobile:dev": "next build && npx cap sync && npx cap run android",
+    "mobile:studio": "next build && npx cap sync && npx cap open android",
+    "mobile:release": "next build && npx cap sync && cd android && gradlew.bat bundleRelease",
+    "android:install": "npm run mobile:build && cd android && gradlew.bat installDebug",
+    "android:clean": "cd android && gradlew.bat clean",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@capacitor/android": "^7.0.3",
+    "@capacitor/app": "^7.0.3",
+    "@capacitor/cli": "^7.0.3",
+    "@capacitor/core": "^7.0.3",
+    "@capacitor/haptics": "^7.0.3",
+    "@capacitor/http": "^0.0.2",
+    "@capacitor/keyboard": "^7.0.3",
+    "@capacitor/splash-screen": "^7.0.3",
+    "@capacitor/status-bar": "^7.0.3",
+    "@tailwindcss/aspect-ratio": "^0.4.2",
+    "@tailwindcss/forms": "^0.5.11",
+    "axios": "^1.6.0",
+    "framer-motion": "^10.16.0",
+    "lucide-react": "^0.294.0",
+    "next": "14.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "recharts": "^2.8.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.8.0",
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "autoprefixer": "^10.4.0",
+    "postcss": "^8.4.0",
+    "tailwindcss": "^3.3.0",
+    "typescript": "^5.3.0"
+  },
+  "capacitor": {
+    "android": {
+      "webDir": "out"
+    }
+  }
+}
