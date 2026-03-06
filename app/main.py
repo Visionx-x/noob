@@ -117,13 +117,11 @@ app.include_router(debug_router, prefix="/api", tags=["Debug"])
 
 
 @app.get("/health")
-@limiter.limit("100/minute")
 def health_check(request: Request):
     return {"status": "ok", "message": "GrowthForge API is running"}
 
 
 @app.get("/api/health")
-@limiter.limit("100/minute")
 def api_health_check(request: Request):
     """Mirror of /health for frontend (baseURL is /api)."""
     return {"status": "ok", "message": "GrowthForge API is running"}
