@@ -1,6 +1,7 @@
 import '../styles/globals.css'
 import Head from 'next/head'
 import { BackButtonHandler } from '@/hooks/useBackButton'
+import ErrorBoundary from '@/components/ErrorBoundary'
 
 export default function RootLayout({
   children,
@@ -19,9 +20,11 @@ export default function RootLayout({
         <title>GrowthForge - Habit Tracking & Achievement System</title>
       </head>
       <body className="min-h-screen bg-gradient-to-br from-slate-800 via-gray-800 to-slate-900">
-        <BackButtonHandler>
-          {children}
-        </BackButtonHandler>
+        <ErrorBoundary>
+          <BackButtonHandler>
+            {children}
+          </BackButtonHandler>
+        </ErrorBoundary>
       </body>
     </html>
   )

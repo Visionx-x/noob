@@ -36,7 +36,7 @@ export default function DashboardPage() {
       await api.healthCheck()
       setHealthStatus('connected')
       
-      // Get current user
+      // Get current user - this will fail if not authenticated
       const userResponse = await api.getCurrentUser()
       if (userResponse.success && userResponse.data) {
         setUser({
@@ -44,10 +44,19 @@ export default function DashboardPage() {
           email: userResponse.data.email || 'final@test.com',
           bio: 'Building better habits one day at a time'
         })
+      } else {
+        // User not authenticated, redirect to login
+        router.push('/auth/login')
+        return
       }
     } catch (error) {
       console.error('Dashboard data load error:', error)
       setHealthStatus('disconnected')
+      // If authentication error, redirect to login
+      if (error.message.includes('401') || error.message.includes('Unauthorized')) {
+        router.push('/auth/login')
+        return
+      }
     }
     
     setIsLoading(false)

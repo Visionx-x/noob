@@ -1,11 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, TrendingUp, Calendar, Target, Activity, CheckCircle, Users, Settings } from 'lucide-react'
+import api from '@/lib/api'
 
 export default function AnalyticsPage() {
   const [selectedPeriod, setSelectedPeriod] = useState('week')
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    checkAuthentication()
+  }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      await api.getCurrentUser()
+    } catch (error) {
+      console.error('Authentication check failed:', error)
+      router.push('/auth/login')
+      return
+    }
+    setIsLoading(false)
+  }
   
   const stats = {
     week: {
@@ -32,6 +51,14 @@ export default function AnalyticsPage() {
   }
 
   const currentStats = stats[selectedPeriod]
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-fintech flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-fintech">
@@ -173,7 +200,7 @@ export default function AnalyticsPage() {
             <div className="grid grid-cols-5 gap-2">
               <Link href="/tasks" className="text-center">
                 <div className="nav-link text-white/60">
-                  <Settings className="w-5 h-5 mx-auto mb-1" />
+                  <Target className="w-5 h-5 mx-auto mb-1" />
                   <span className="text-xs">Tasks</span>
                 </div>
               </Link>

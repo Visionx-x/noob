@@ -1,11 +1,30 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Users, Trophy, TrendingUp, Award, Crown, Activity, CheckCircle, Settings } from 'lucide-react'
+import api from '@/lib/api'
 
 export default function CommunityPage() {
   const [activeTab, setActiveTab] = useState('leaderboard')
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    checkAuthentication()
+  }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      await api.getCurrentUser()
+    } catch (error) {
+      console.error('Authentication check failed:', error)
+      router.push('/auth/login')
+      return
+    }
+    setIsLoading(false)
+  }
   
   const leaderboard = [
     { rank: 1, name: 'Alex Chen', xp: 15420, habits: 15, streak: 45, avatar: '👤' },
@@ -47,6 +66,14 @@ export default function CommunityPage() {
       daysLeft: 8
     }
   ]
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-fintech flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-fintech">
@@ -213,7 +240,7 @@ export default function CommunityPage() {
             <div className="grid grid-cols-5 gap-2">
               <Link href="/tasks" className="text-center">
                 <div className="nav-link text-white/60">
-                  <Settings className="w-5 h-5 mx-auto mb-1" />
+                  <Target className="w-5 h-5 mx-auto mb-1" />
                   <span className="text-xs">Tasks</span>
                 </div>
               </Link>

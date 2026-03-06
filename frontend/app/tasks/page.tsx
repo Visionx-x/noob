@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Plus, Edit, Trash2, CheckCircle, Circle, Clock, Target, Activity, TrendingUp, Users } from 'lucide-react'
+import api from '@/lib/api'
 
 export default function TasksPage() {
   const [tasks, setTasks] = useState([
@@ -15,8 +17,26 @@ export default function TasksPage() {
   const [showAddForm, setShowAddForm] = useState(false)
   const [editingTask, setEditingTask] = useState(null)
   const [newTask, setNewTask] = useState({ title: '', description: '', xp: 10 })
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    checkAuthentication()
+  }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      await api.getCurrentUser()
+    } catch (error) {
+      console.error('Authentication check failed:', error)
+      router.push('/auth/login')
+      return
+    }
+    setIsLoading(false)
+  }
 
   const toggleTask = (taskId) => {
+    console.log('Toggling task:', taskId)
     setTasks(tasks.map(task => 
       task.id === taskId 
         ? { ...task, completed: !task.completed }
@@ -26,6 +46,7 @@ export default function TasksPage() {
 
   const addTask = () => {
     if (newTask.title.trim()) {
+      console.log('Adding task:', newTask)
       const task = {
         id: Date.now(),
         title: newTask.title,
@@ -37,11 +58,14 @@ export default function TasksPage() {
       setTasks([...tasks, task])
       setNewTask({ title: '', description: '', xp: 10 })
       setShowAddForm(false)
+    } else {
+      console.log('Cannot add task: title is empty')
     }
   }
 
   const updateTask = () => {
     if (editingTask && newTask.title.trim()) {
+      console.log('Updating task:', editingTask.id, newTask)
       setTasks(tasks.map(task => 
         task.id === editingTask.id 
           ? { ...task, title: newTask.title, description: newTask.description, xp: newTask.xp }
@@ -49,10 +73,13 @@ export default function TasksPage() {
       ))
       setEditingTask(null)
       setNewTask({ title: '', description: '', xp: 10 })
+    } else {
+      console.log('Cannot update task: missing data')
     }
   }
 
   const deleteTask = (taskId) => {
+    console.log('Deleting task:', taskId)
     setTasks(tasks.filter(task => task.id !== taskId))
   }
 
@@ -63,6 +90,14 @@ export default function TasksPage() {
 
   const completedCount = tasks.filter(task => task.completed).length
   const totalXP = tasks.reduce((sum, task) => sum + (task.completed ? task.xp : 0), 0)
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-fintech flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-fintech pb-20">

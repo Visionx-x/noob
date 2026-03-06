@@ -1,8 +1,10 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { ArrowLeft, Trophy, Star, Target, Award, Activity, TrendingUp, CheckCircle, Users, Settings } from 'lucide-react'
+import api from '@/lib/api'
 
 export default function AchievementsPage() {
   const [achievements] = useState([
@@ -29,24 +31,49 @@ export default function AchievementsPage() {
     {
       id: 3,
       title: "Habit Master",
-      description: "Maintain a 30-day streak",
-      icon: Star,
+      description: "Complete 50 habits total",
+      icon: Award,
       progress: 12,
-      total: 30,
+      total: 50,
       xp: 500,
       unlocked: false
     },
     {
       id: 4,
-      title: "Consistency King",
-      description: "Complete all habits for a week",
-      icon: Award,
-      progress: 3,
-      total: 7,
-      xp: 300,
+      title: "Legendary Streak",
+      description: "Maintain a 30-day streak",
+      icon: Star,
+      progress: 5,
+      total: 30,
+      xp: 1000,
       unlocked: false
     }
   ])
+  const [isLoading, setIsLoading] = useState(true)
+  const router = useRouter()
+
+  useEffect(() => {
+    checkAuthentication()
+  }, [])
+
+  const checkAuthentication = async () => {
+    try {
+      await api.getCurrentUser()
+    } catch (error) {
+      console.error('Authentication check failed:', error)
+      router.push('/auth/login')
+      return
+    }
+    setIsLoading(false)
+  }
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-fintech flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gradient-fintech">
@@ -172,7 +199,7 @@ export default function AchievementsPage() {
             <div className="grid grid-cols-5 gap-2">
               <Link href="/tasks" className="text-center">
                 <div className="nav-link text-white/60">
-                  <Settings className="w-5 h-5 mx-auto mb-1" />
+                  <Target className="w-5 h-5 mx-auto mb-1" />
                   <span className="text-xs">Tasks</span>
                 </div>
               </Link>
