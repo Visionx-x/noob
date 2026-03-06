@@ -8,7 +8,7 @@ class User(Base):
     __tablename__ = "users"
     
     id = Column(Integer, primary_key=True, index=True)
-    username = Column(String, unique=True, index=True, nullable=True)
+    username = Column(String, index=True, nullable=True)  # Removed unique constraint
     email = Column(String, unique=True, index=True, nullable=False)
     hashed_password = Column(String, nullable=False)
     total_xp = Column(Integer, default=0, index=True)

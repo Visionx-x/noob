@@ -13,23 +13,48 @@ router = APIRouter()
 
 @router.post("/signup", response_model=StandardResponse)
 def signup(user_data: UserSignup, db: Session = Depends(get_db)):
+    print(f"🔍 SIGNUP REQUEST RECEIVED: {user_data.email}")
+    
     try:
+        # Validate email format
+        if not user_data.email or '@' not in user_data.email:
+            return StandardResponse(
+                success=False,
+                error="Invalid email format"
+            )
+        
+        # Validate password
+        if not user_data.password or len(user_data.password) < 6:
+            return StandardResponse(
+                success=False,
+                error="Password must be at least 6 characters long"
+            )
+        
         # Check if user already exists
-        if get_user_by_email(db, user_data.email):
+        existing_user = get_user_by_email(db, user_data.email)
+        if existing_user:
+            print(f"❌ User already exists: {existing_user.email}")
             return StandardResponse(
                 success=False,
                 error="Email already registered"
             )
         
-        # Create new user (removed username validation)
+        # Create new user
         print(f"Debug: Creating user with email: {user_data.email}")
         hashed_password = get_password_hash(user_data.password)
         print(f"Debug: Password hashed successfully")
         
+        # Generate a username from email
+        username = user_data.email.split('@')[0].replace('.', '').replace('_', '')
+        print(f"Debug: Generated username: {username}")
+        
         db_user = User(
             email=user_data.email,
+            username=username,  # Add generated username
             hashed_password=hashed_password
         )
+        
+        print(f"Debug: Adding user to session...")
         db.add(db_user)
         print(f"Debug: User added to session: {db_user}")
         db.commit()
@@ -56,6 +81,7 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
         refresh_token = create_refresh_token(data={"sub": db_user.email})
         print(f"Debug: Tokens created successfully")
         
+        print(f"✅ SIGNUP SUCCESS: {user_data.email}")
         return StandardResponse(
             success=True,
             data={
@@ -66,7 +92,10 @@ def signup(user_data: UserSignup, db: Session = Depends(get_db)):
         )
         
     except Exception as e:
-        print(f"Debug: Error in signup: {e}")
+        print(f"❌ SIGNUP ERROR: {e}")
+        print(f"❌ Error type: {type(e)}")
+        import traceback
+        print(f"❌ Full traceback: {traceback.format_exc()}")
         return StandardResponse(
             success=False,
             error=f"Registration failed: {str(e)}"
