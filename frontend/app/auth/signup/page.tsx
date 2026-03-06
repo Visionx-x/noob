@@ -53,28 +53,17 @@ export default function SignupPage() {
     try {
       console.log('🔍 Attempting signup with:', { email, password: '***' })
       
-      // First test connection
-      console.log('📡 Testing API connection before signup...')
-      const isConnected = await api.testConnection()
-      console.log('📡 Connection test result:', isConnected)
-      
-      if (!isConnected) {
-        setError('Cannot connect to server. Please check your internet connection.')
-        setIsLoading(false)
-        return
-      }
-      
-      console.log('🚀 Calling API signup...')
+      console.log(' Calling API signup...')
       const response = await api.signup({ email, password })
       
       console.log('✅ Signup response received:', response)
       
-      if (response.success) {
+      if (response && response.success) {
         console.log('🎉 Signup successful, redirecting to dashboard')
         router.push('/dashboard')
       } else {
         console.error('❌ Signup failed:', response)
-        setError(response.error || response.message || 'Signup failed. Please try again.')
+        setError(response?.error || response?.message || 'Signup failed. Please try again.')
       }
     } catch (err) {
       console.error('❌ Signup error caught:', err)

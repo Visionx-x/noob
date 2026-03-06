@@ -38,28 +38,17 @@ export default function LoginPage() {
     try {
       console.log('🔍 Attempting login with:', { email, password: '***' })
       
-      // First test connection
-      console.log('📡 Testing API connection before login...')
-      const isConnected = await api.testConnection()
-      console.log('📡 Connection test result:', isConnected)
-      
-      if (!isConnected) {
-        setError('Cannot connect to server. Please check your internet connection.')
-        setIsLoading(false)
-        return
-      }
-      
       console.log('🚀 Calling API login...')
       const response = await api.login({ email, password })
       
       console.log('✅ Login response received:', response)
       
-      if (response.success) {
+      if (response && response.success) {
         console.log('🎉 Login successful, redirecting to dashboard')
         router.push('/dashboard')
       } else {
         console.error('❌ Login failed:', response)
-        setError(response.error || response.message || 'Login failed. Please check your credentials.')
+        setError(response?.error || response?.message || 'Login failed. Please check your credentials.')
       }
     } catch (err) {
       console.error('❌ Login error caught:', err)
