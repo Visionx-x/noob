@@ -41,9 +41,13 @@ class ApiHelper {
   
   async testConnection() {
     console.log('🔍 TESTING API CONNECTION...')
+    console.log('📡 Base URL:', this.baseURL)
+    
     try {
-      // Use direct health endpoint without /api prefix since baseURL already includes it
-      const healthUrl = this.baseURL.replace('/api', '') + '/health'
+      // Use the /api/health endpoint since that's what the backend exposes
+      const healthUrl = this.baseURL + '/health'
+      console.log('📡 Testing health endpoint:', healthUrl)
+      
       const response = await fetch(healthUrl, {
         method: 'GET',
         headers: {
@@ -54,6 +58,7 @@ class ApiHelper {
       console.log('📡 CONNECTION TEST RESULT:', {
         status: response.status,
         ok: response.ok,
+        statusText: response.statusText,
         url: healthUrl
       })
       

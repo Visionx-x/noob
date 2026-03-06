@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Connection Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .test-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 4px solid #4CAF50; }
+        .error { border-left: 4px solid #f44336; }
+        .info { border-left: 4px solid #2196F3; }
+        button {
+            background: #2196F3;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #1976D2; }
+        .log {
+            background: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 4px;
+            padding: 10px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 12px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 GrowthForge API Connection Test</h1>
+    
+    <div class="test-card info">
+        <h3>📡 API Configuration</h3>
+        <p><strong>Base URL:</strong> <span id="baseUrl">http://77.90.6.237:2000/api</span></p>
+        <p><strong>Health URL:</strong> <span id="healthUrl">http://77.90.6.237:2000/api/health</span></p>
+    </div>
+
+    <div class="test-card">
+        <h3>🧪 Connection Tests</h3>
+        <button onclick="testHealth()">Test Health Endpoint</button>
+        <button onclick="testSignup()">Test Signup Endpoint</button>
+        <button onclick="testLogin()">Test Login Endpoint</button>
+        <button onclick="clearLogs()">Clear Logs</button>
+    </div>
+
+    <div id="results"></div>
+    
+    <div class="test-card">
+        <h3>📝 Logs</h3>
+        <div id="logs" class="log"></div>
+    </div>
+
+    <script>
+        const API_BASE_URL = 'http://77.90.6.237:2000/api';
+        
+        function log(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logsDiv = document.getElementById('logs');
+            const logEntry = document.createElement('div');
+            logEntry.innerHTML = `[${timestamp}] ${message}`;
+            logEntry.style.color = type === 'error' ? 'red' : type === 'success' ? 'green' : 'black';
+            logsDiv.appendChild(logEntry);
+            logsDiv.scrollTop = logsDiv.scrollHeight;
+        }
+
+        function showResult(title, message, isSuccess) {
+            const resultsDiv = document.getElementById('results');
+            const resultCard = document.createElement('div');
+            resultCard.className = `test-card ${isSuccess ? 'success' : 'error'}`;
+            resultCard.innerHTML = `
+                <h3>${isSuccess ? '✅' : '❌'} ${title}</h3>
+                <p>${message}</p>
+            `;
+            resultsDiv.appendChild(resultCard);
+        }
+
+        async function testHealth() {
+            log('🔍 Testing health endpoint...');
+            try {
+                const response = await fetch(`${API_BASE_URL}/health`);
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Health check successful: ${JSON.stringify(data)}`, 'success');
+                    showResult('Health Test', `Connected successfully! Response: ${JSON.stringify(data)}`, true);
+                } else {
+                    log(`❌ Health check failed: ${response.status}`, 'error');
+                    showResult('Health Test', `Failed: ${response.status} ${response.statusText}`, false);
+                }
+            } catch (error) {
+                log(`❌ Health check error: ${error.message}`, 'error');
+                showResult('Health Test', `Network error: ${error.message}`, false);
+            }
+        }
+
+        async function testSignup() {
+            log('🔍 Testing signup endpoint...');
+            try {
+                const testData = {
+                    email: `test${Date.now()}@example.com`,
+                    password: 'test123456'
+                };
+                
+                log(`Sending signup request: ${JSON.stringify(testData)}`);
+                const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Signup test successful: ${JSON.stringify(data)}`, 'success');
+                    showResult('Signup Test', `Signup endpoint working! Response: ${JSON.stringify(data)}`, true);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    log(`❌ Signup test failed: ${JSON.stringify(errorData)}`, 'error');
+                    showResult('Signup Test', `Failed: ${response.status} - ${errorData.error || 'Unknown error'}`, false);
+                }
+            } catch (error) {
+                log(`❌ Signup test error: ${error.message}`, 'error');
+                showResult('Signup Test', `Network error: ${error.message}`, false);
+            }
+        }
+
+        async function testLogin() {
+            log('🔍 Testing login endpoint...');
+            try {
+                const testData = {
+                    email: 'final@test.com',
+                    password: 'test'
+                };
+                
+                log(`Sending login request: ${JSON.stringify({ ...testData, password: '***' })}`);
+                const response = await fetch(`${API_BASE_URL}/auth/login`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(testData)
+                });
+                
+                log(`Response status: ${response.status} ${response.statusText}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    log(`✅ Login test successful: ${JSON.stringify(data)}`, 'success');
+                    showResult('Login Test', `Login endpoint working! Response: ${JSON.stringify(data)}`, true);
+                } else {
+                    const errorData = await response.json().catch(() => ({}));
+                    log(`❌ Login test failed: ${JSON.stringify(errorData)}`, 'error');
+                    showResult('Login Test', `Failed: ${response.status} - ${errorData.error || 'Unknown error'}`, false);
+                }
+            } catch (error) {
+                log(`❌ Login test error: ${error.message}`, 'error');
+                showResult('Login Test', `Network error: ${error.message}`, false);
+            }
+        }
+
+        function clearLogs() {
+            document.getElementById('logs').innerHTML = '';
+            document.getElementById('results').innerHTML = '';
+            log('📝 Logs cleared');
+        }
+
+        // Auto-test on load
+        window.onload = function() {
+            log('🚀 API Connection Test Page Loaded');
+            log('📡 Testing connection to: ' + API_BASE_URL);
+            testHealth();
+        };
+    </script>
+</body>
+</html>

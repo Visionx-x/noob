@@ -36,30 +36,47 @@ export default function LoginPage() {
     }
 
     try {
-      console.log('Attempting login with:', { email })
+      console.log('🔍 Attempting login with:', { email, password: '***' })
+      
+      // First test connection
+      console.log('📡 Testing API connection before login...')
+      const isConnected = await api.testConnection()
+      console.log('📡 Connection test result:', isConnected)
+      
+      if (!isConnected) {
+        setError('Cannot connect to server. Please check your internet connection.')
+        setIsLoading(false)
+        return
+      }
+      
+      console.log('🚀 Calling API login...')
       const response = await api.login({ email, password })
       
-      console.log('Login response:', response)
+      console.log('✅ Login response received:', response)
       
       if (response.success) {
-        console.log('Login successful, redirecting to dashboard')
+        console.log('🎉 Login successful, redirecting to dashboard')
         router.push('/dashboard')
       } else {
-        console.error('Login failed:', response)
+        console.error('❌ Login failed:', response)
         setError(response.error || response.message || 'Login failed. Please check your credentials.')
       }
     } catch (err) {
-      console.error('Login error:', err)
+      console.error('❌ Login error caught:', err)
       const msg = (err instanceof Error ? err.message : String(err)) || ''
-      // Better error handling
-      if (msg.includes('Failed to fetch')) {
-        setError('Network error. Please check your connection and try again.')
+      console.log('🔍 Error message:', msg)
+      
+      // Enhanced error handling
+      if (msg.includes('Failed to fetch') || msg.includes('NetworkError') || msg.includes('ERR_NETWORK')) {
+        setError('Network error. Please check your internet connection and try again.')
       } else if (msg.includes('401')) {
         setError('Invalid email or password. Please try again.')
-      } else if (msg.includes('400')) {
+      } else if (msg.includes('400') || msg.includes('Invalid')) {
         setError('Invalid request. Please check your input.')
-      } else if (msg.includes('500')) {
+      } else if (msg.includes('500') || msg.includes('Server')) {
         setError('Server error. Please try again later.')
+      } else if (msg.includes('CORS')) {
+        setError('Connection blocked by browser. Please try again or contact support.')
       } else {
         setError(msg || 'An error occurred. Please try again.')
       }
