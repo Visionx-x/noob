@@ -30,14 +30,15 @@ export function ConnectionStatus() {
     setStatus(prev => ({ ...prev, isChecking: true, error: null }))
     
     try {
-      const result = await api.healthCheck()
+      // Use the API helper's testConnection method for direct health check
+      const isConnected = await api.testConnection()
       setStatus({
-        isConnected: true,
+        isConnected: isConnected,
         isChecking: false,
         lastChecked: new Date(),
         error: null
       })
-      console.log('✅ APP CONNECTION STATUS: CONNECTED')
+      console.log('✅ APP CONNECTION STATUS:', isConnected ? 'CONNECTED' : 'DISCONNECTED')
     } catch (error) {
       setStatus({
         isConnected: false,

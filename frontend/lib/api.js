@@ -42,7 +42,9 @@ class ApiHelper {
   async testConnection() {
     console.log('🔍 TESTING API CONNECTION...')
     try {
-      const response = await fetch(`${this.baseURL}/health`, {
+      // Use direct health endpoint without /api prefix since baseURL already includes it
+      const healthUrl = this.baseURL.replace('/api', '') + '/health'
+      const response = await fetch(healthUrl, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -52,7 +54,7 @@ class ApiHelper {
       console.log('📡 CONNECTION TEST RESULT:', {
         status: response.status,
         ok: response.ok,
-        url: `${this.baseURL}/health`
+        url: healthUrl
       })
       
       if (response.ok) {
@@ -191,6 +193,7 @@ class ApiHelper {
   async healthCheck() {
     console.log('🔍 HEALTH CHECK STARTING...')
     try {
+      // Use /api/health endpoint since this is called through the request method
       const result = await this.request('/health')
       console.log('✅ HEALTH CHECK SUCCESS:', result)
       return result
@@ -291,4 +294,8 @@ class ApiHelper {
 
 // Create and export singleton instance
 const api = new ApiHelper()
+
+// Export the testConnection method for external use
+export const testConnection = api.testConnection.bind(api)
+
 export default api
