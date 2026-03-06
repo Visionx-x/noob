@@ -9,37 +9,13 @@ import { BackButton } from '@/components/BackButton'
 
 export default function DashboardPage() {
   const [healthStatus, setHealthStatus] = useState<'connected' | 'disconnected'>('disconnected')
-  const [users, setUsers] = useState([])
   const [isLoading, setIsLoading] = useState(true)
-  const [completedToday] = useState(8)
-  const [totalHabits] = useState(24)
-  const [currentStreak] = useState(12)
   const [mounted, setMounted] = useState(false)
-  const [isEditingProfile, setIsEditingProfile] = useState(false)
-  const [profileData, setProfileData] = useState({
+  const [user, setUser] = useState({
     name: 'User',
     email: 'final@test.com',
     bio: 'Building better habits one day at a time'
   })
-
-  // Updated weekly progress data
-  const weeklyData = [
-    { day: 'Mon', percentage: 12 },
-    { day: 'Tue', percentage: 93 },
-    { day: 'Wed', percentage: 91 },
-    { day: 'Thu', percentage: 42 },
-    { day: 'Fri', percentage: 77 },
-    { day: 'Sat', percentage: 97 },
-    { day: 'Sun', percentage: 78 }
-  ]
-
-  // User achievements data
-  const achievements = [
-    { id: 1, title: "First Steps", description: "Complete your first habit", icon: Target, progress: 100, total: 1, xp: 50, unlocked: true },
-    { id: 2, title: "Week Warrior", description: "Complete habits for 7 days straight", icon: Trophy, progress: 5, total: 7, xp: 200, unlocked: false },
-    { id: 3, title: "Habit Master", description: "Maintain a 30-day streak", icon: Star, progress: 12, total: 30, xp: 500, unlocked: false },
-    { id: 4, title: "Consistency King", description: "Complete all habits for a week", icon: Award, progress: 3, total: 7, xp: 300, unlocked: false }
-  ]
 
   const router = useRouter()
 
@@ -59,20 +35,21 @@ export default function DashboardPage() {
       // Check backend health
       await api.healthCheck()
       setHealthStatus('connected')
-    } catch (error) {
-      setHealthStatus('disconnected')
-    }
-
-    // Fetch users
-    try {
-      const usersData = await api.getUsers()
-      if (usersData.success) {
-        setUsers(usersData.data.users || [])
+      
+      // Get current user
+      const userResponse = await api.getCurrentUser()
+      if (userResponse.success && userResponse.data) {
+        setUser({
+          name: userResponse.data.username || 'User',
+          email: userResponse.data.email || 'final@test.com',
+          bio: 'Building better habits one day at a time'
+        })
       }
     } catch (error) {
-      console.error('Failed to fetch users:', error)
+      console.error('Dashboard data load error:', error)
+      setHealthStatus('disconnected')
     }
-
+    
     setIsLoading(false)
   }
 
@@ -85,14 +62,12 @@ export default function DashboardPage() {
     router.push('/')
   }
 
-  const saveProfile = () => {
-    setIsEditingProfile(false)
-    // Here you would typically save to backend
-    console.log('Profile saved:', profileData)
-  }
-
-  if (!mounted) {
-    return null
+  if (!mounted || isLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-fintech flex items-center justify-center">
+        <div className="text-white">Loading...</div>
+      </div>
+    )
   }
 
   return (
@@ -125,53 +100,13 @@ export default function DashboardPage() {
         <div className="glass-card glass-card-hover mb-8 p-6">
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center space-x-4">
-              <div className="w-16 h-16 bg-gradient-to-br from-button-500 to-accent-400 rounded-full flex items-center justify-center relative">
-                <span className="text-white font-bold text-xl">U</span>
-                <button 
-                  className="absolute bottom-0 right-0 w-6 h-6 bg-white/20 rounded-full flex items-center justify-center hover:bg-white/30 transition-colors"
-                  onClick={() => setIsEditingProfile(true)}
-                >
-                  <Edit className="w-3 h-3 text-white" />
-                </button>
+              <div className="w-16 h-16 bg-gradient-to-br from-button-500 to-accent-400 rounded-full flex items-center justify-center">
+                <span className="text-white font-bold text-xl">{user.name.charAt(0).toUpperCase()}</span>
               </div>
               <div>
-                {isEditingProfile ? (
-                  <div className="space-y-2">
-                    <input
-                      type="text"
-                      value={profileData.name}
-                      onChange={(e) => setProfileData({ ...profileData, name: e.target.value })}
-                      className="glass-input text-sm"
-                      placeholder="Your name"
-                    />
-                    <textarea
-                      value={profileData.bio}
-                      onChange={(e) => setProfileData({ ...profileData, bio: e.target.value })}
-                      className="glass-input text-sm min-h-[60px]"
-                      placeholder="Your bio"
-                    />
-                    <div className="flex space-x-2">
-                      <button
-                        onClick={saveProfile}
-                        className="glass-button-primary text-xs px-3 py-1"
-                      >
-                        Save
-                      </button>
-                      <button
-                        onClick={() => setIsEditingProfile(false)}
-                        className="glass-button-secondary text-xs px-3 py-1"
-                      >
-                        Cancel
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <>
-                    <h2 className="text-title text-white">{profileData.name}</h2>
-                    <p className="text-body text-white/70">{profileData.email}</p>
-                    <p className="text-caption text-white/50 mt-1">{profileData.bio}</p>
-                  </>
-                )}
+                <h2 className="text-title text-white">{user.name}</h2>
+                <p className="text-body text-white/70">{user.email}</p>
+                <p className="text-caption text-white/50 mt-1">{user.bio}</p>
               </div>
             </div>
             <button onClick={logout} className="text-white/70 hover:text-white transition-colors">
@@ -180,71 +115,26 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Achievements Section */}
-        <div className="glass-card p-6 mb-8">
-          <h3 className="text-title text-white mb-4">Recent Achievements</h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {achievements.slice(0, 2).map((achievement, index) => {
-              const Icon = achievement.icon
-              const isUnlocked = achievement.unlocked
-              
-              return (
-                <div
-                  key={achievement.id}
-                  className={`glass-card glass-card-hover p-4 ${
-                    isUnlocked ? '' : 'opacity-75'
-                  }`}
-                >
-                  <div className="flex items-start justify-between mb-3">
-                    <div className={`p-2 rounded-lg ${
-                      isUnlocked ? 'bg-accent-500/20' : 'bg-white/10'
-                    }`}>
-                      <Icon className={`w-5 h-5 ${isUnlocked ? 'text-accent-400' : 'text-white/40'}`} />
-                    </div>
-                    <div className="text-right">
-                      <p className={`text-caption font-semibold ${
-                        isUnlocked ? 'text-accent-400' : 'text-white/50'
-                      }`}>
-                        +{achievement.xp} XP
-                      </p>
-                    </div>
-                  </div>
-                  
-                  <h4 className={`text-body font-semibold mb-1 ${
-                    isUnlocked ? 'text-white' : 'text-white/70'
-                  }`}>
-                    {achievement.title}
-                  </h4>
-                  
-                  <p className={`text-caption mb-2 ${
-                    isUnlocked ? 'text-white/70' : 'text-white/50'
-                  }`}>
-                    {achievement.description}
-                  </p>
-                  
-                  <div className="w-full bg-white/10 rounded-full h-1 overflow-hidden">
-                    <div
-                      className={`h-1 rounded-full transition-all duration-1000 ${
-                        isUnlocked ? 'bg-accent-400' : 'bg-white/30'
-                      }`}
-                      style={{ width: `${(achievement.progress / achievement.total) * 100}%` }}
-                    />
-                  </div>
-                </div>
-              )
-            })}
+        {/* Quick Stats */}
+        <div className="grid grid-cols-2 gap-4 mb-8">
+          <div className="glass-card p-4 text-center">
+            <div className="text-2xl font-bold text-white mb-1">12</div>
+            <div className="text-caption text-white/70">Day Streak</div>
+          </div>
+          <div className="glass-card p-4 text-center">
+            <div className="text-2xl font-bold text-white mb-1">85%</div>
+            <div className="text-caption text-white/70">Completion Rate</div>
           </div>
         </div>
       </div>
 
-      {/* Bottom Navigation with 5 buttons */}
+      {/* Bottom Navigation */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white/10 backdrop-blur-lg border-t border-white/20">
         <div className="container-mobile py-4">
           <div className="grid grid-cols-5 gap-2">
-            {/* Task Management Button */}
             <Link href="/tasks" className="text-center">
               <div className="nav-link text-white/60">
-                <Settings className="w-5 h-5 mx-auto mb-1" />
+                <Target className="w-5 h-5 mx-auto mb-1" />
                 <span className="text-xs">Tasks</span>
               </div>
             </Link>
@@ -265,7 +155,7 @@ export default function DashboardPage() {
             
             <Link href="/achievements" className="text-center">
               <div className="nav-link text-white/60">
-                <CheckCircle className="w-5 h-5 mx-auto mb-1" />
+                <Trophy className="w-5 h-5 mx-auto mb-1" />
                 <span className="text-xs">Rewards</span>
               </div>
             </Link>

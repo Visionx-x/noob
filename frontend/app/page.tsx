@@ -41,20 +41,22 @@ export default function HomePage() {
 
         {/* Main Action Buttons */}
         <div className="space-y-4 mb-16">
-          <a href="/auth/signup" className="block">
-            <div className="glass-button-primary w-full btn-lg group text-center">
-              <span className="flex items-center justify-center space-x-3">
-                <span>Start Your Journey</span>
-                <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-              </span>
-            </div>
-          </a>
+          <button 
+            onClick={() => router.push('/auth/signup')}
+            className="glass-button-primary w-full btn-lg group text-center"
+          >
+            <span className="flex items-center justify-center space-x-3">
+              <span>Start Your Journey</span>
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+            </span>
+          </button>
           
-          <a href="/auth/login" className="block">
-            <div className="glass-button-secondary w-full btn-lg text-center">
-              Welcome Back
-            </div>
-          </a>
+          <button 
+            onClick={() => router.push('/auth/login')}
+            className="glass-button-secondary w-full btn-lg text-center"
+          >
+            Welcome Back
+          </button>
         </div>
 
         {/* Three Main Features */}
