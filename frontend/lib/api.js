@@ -22,11 +22,57 @@ class ApiHelper {
     this.loadToken()
     
     // Log initialization for mobile app
+    console.log('🚀 MOBILE APP INITIALIZING')
+    console.log('📡 API Base URL:', this.baseURL)
+    console.log('🔐 Has Token:', !!this.token)
+    console.log('📱 Platform:', 'Android Mobile App')
+    console.log('🌐 User Agent:', navigator.userAgent)
+    
     mobileDebugger.info('Mobile API Helper initialized', {
       baseURL: this.baseURL,
       platform: 'Android Mobile App',
-      hasToken: !!this.token
+      hasToken: !!this.token,
+      userAgent: navigator.userAgent
     })
+    
+    // Test connection immediately
+    this.testConnection()
+  }
+  
+  async testConnection() {
+    console.log('🔍 TESTING API CONNECTION...')
+    try {
+      const response = await fetch(`${this.baseURL}/health`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      })
+      
+      console.log('📡 CONNECTION TEST RESULT:', {
+        status: response.status,
+        ok: response.ok,
+        url: `${this.baseURL}/health`
+      })
+      
+      if (response.ok) {
+        const data = await response.json()
+        console.log('✅ API CONNECTION SUCCESSFUL:', data)
+        mobileDebugger.info('API Connection Test Successful', data)
+        return true
+      } else {
+        console.log('❌ API CONNECTION FAILED:', response.status, response.statusText)
+        mobileDebugger.error('API Connection Test Failed', {
+          status: response.status,
+          statusText: response.statusText
+        })
+        return false
+      }
+    } catch (error) {
+      console.log('❌ API CONNECTION ERROR:', error)
+      mobileDebugger.error('API Connection Test Error', { error: error.message })
+      return false
+    }
   }
 
   // Load token from localStorage (mobile compatible)
@@ -39,55 +85,52 @@ class ApiHelper {
 
   // Save token to localStorage (mobile compatible)
   saveToken(token) {
+    this.token = token
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.setItem('access_token', token)
-      this.token = token
-      mobileDebugger.logAuthEvent('Token Saved', { tokenLength: token.length })
+      mobileDebugger.debug('Token saved to storage', { hasToken: !!token })
     }
   }
 
-  // Clear token
+  // Clear token from storage
   clearToken() {
+    this.token = null
     if (typeof window !== 'undefined' && window.localStorage) {
       localStorage.removeItem('access_token')
       localStorage.removeItem('refresh_token')
-      this.token = null
-      mobileDebugger.logAuthEvent('Token Cleared')
     }
+    mobileDebugger.logAuthEvent('Token Cleared')
   }
 
-  async request(endpoint, options = {}) {
+  async request(endpoint, config = {}) {
     const startTime = Date.now()
     const url = `${this.baseURL}${endpoint}`
     
-    console.log('Mobile API Request:', {
-      method: options.method || 'GET',
-      url,
-      hasToken: !!this.token
-    })
+    console.log('🌐 API REQUEST STARTING')
+    console.log('📡 URL:', url)
+    console.log('🔧 Method:', config.method || 'GET')
+    console.log('📋 Config:', config)
+    console.log('🔐 Has Token:', !!this.token)
     
-    // Mobile app request configuration
-    const config = {
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json',
-        ...options.headers,
-      },
-      mode: 'cors',
-      credentials: 'omit',
-      ...options,
+    // Set default headers
+    config.headers = {
+      'Content-Type': 'application/json',
+      ...config.headers,
     }
 
     // Add authorization header if token exists
     if (this.token) {
       config.headers['Authorization'] = `Bearer ${this.token}`
+      console.log('🔑 Authorization header added')
     }
 
     try {
+      console.log('📤 SENDING REQUEST...')
       mobileDebugger.debug('Mobile API Request Starting', {
         method: config.method || 'GET',
         url,
-        hasAuth: !!this.token
+        hasAuth: !!this.token,
+        headers: config.headers
       })
       
       // Add timeout for mobile
@@ -98,114 +141,68 @@ class ApiHelper {
       const response = await fetch(url, config)
       clearTimeout(timeoutId)
       
-      console.log('Mobile API Response:', {
-        status: response.status,
-        ok: response.ok,
-        url
-      })
+      console.log('📥 API RESPONSE RECEIVED:')
+      console.log('📊 Status:', response.status)
+      console.log('✅ OK:', response.ok)
+      console.log('🌐 URL:', url)
+      console.log('📋 Headers:', Object.fromEntries(response.headers.entries()))
       
       mobileDebugger.debug('API Response Received', {
         status: response.status,
         ok: response.ok,
-        duration: Date.now() - startTime
+        duration: Date.now() - startTime,
+        headers: Object.fromEntries(response.headers.entries())
       })
       
       if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+        console.log('❌ RESPONSE NOT OK - THROWING ERROR')
+        const errorText = await response.text()
+        console.log('📄 Error Response Body:', errorText)
+        throw new Error(`HTTP ${response.status}: ${response.statusText} - ${errorText}`)
       }
       
       const data = await response.json()
-      console.log('Mobile API Data:', data)
+      console.log('📦 API RESPONSE DATA:', data)
+      console.log('✅ REQUEST COMPLETED SUCCESSFULLY')
       
       return data
     } catch (error) {
       const duration = Date.now() - startTime
       
+      console.log('💥 API REQUEST FAILED:')
+      console.log('❌ Error:', error.message)
+      console.log('⏱️ Duration:', `${duration}ms`)
+      console.log('📡 URL:', url)
+      console.log('🔧 Method:', config.method || 'GET')
+      
       mobileDebugger.logNetworkError(error, {
         url,
         method: config.method || 'GET',
         duration: `${duration}ms`,
-        hasAuth: !!this.token
+        hasAuth: !!this.token,
+        error: error.message
       })
-      
-      // Enhanced error logging for mobile debugging
-      if (typeof window !== 'undefined') {
-        const errMsg = (error && error.message) || ''
-        // Show user-friendly error message
-        if (error.name === 'AbortError') {
-          mobileDebugger.warn('Request timed out', { url, duration: `${duration}ms` })
-          console.error('Request timed out. Please check your connection.')
-        } else if (errMsg.includes('Failed to fetch')) {
-          mobileDebugger.warn('Network error', { url, duration: `${duration}ms` })
-          console.error('Network error. Please check your internet connection.')
-        }
-      }
       
       throw error
     }
   }
 
-  // Health check (uses /api/health to match baseURL)
+  // Health check
   async healthCheck() {
+    console.log('🔍 HEALTH CHECK STARTING...')
     try {
       const result = await this.request('/health')
-      mobileDebugger.info('Health check successful', result)
+      console.log('✅ HEALTH CHECK SUCCESS:', result)
       return result
     } catch (error) {
-      mobileDebugger.error('Health check failed', error)
+      console.log('❌ HEALTH CHECK FAILED:', error)
       throw error
     }
   }
 
-  // Users
-  async getUsers() {
-    return this.request('/auth/users')
-  }
-
-  async createUser(userData) {
-    mobileDebugger.logAuthEvent('User Creation Started', { email: userData.email })
-    try {
-      const result = await this.request('/auth/signup', {
-        method: 'POST',
-        body: JSON.stringify(userData),
-      })
-      mobileDebugger.logAuthEvent('User Creation Success', { success: result.success })
-      return result
-    } catch (error) {
-      mobileDebugger.logAuthEvent('User Creation Failed', { error: error.message })
-      throw error
-    }
-  }
-
-  // Auth endpoints
-  async login(credentials) {
-    mobileDebugger.logAuthEvent('Login Started', { email: credentials.email })
-    try {
-      const response = await this.request('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(credentials),
-      })
-      
-      // Save tokens on successful login
-      if (response.success && response.data) {
-        this.saveToken(response.data.access_token)
-        if (response.data.refresh_token) {
-          localStorage.setItem('refresh_token', response.data.refresh_token)
-        }
-        mobileDebugger.logAuthEvent('Login Success', { email: credentials.email })
-      }
-      
-      return response
-    } catch (error) {
-      mobileDebugger.logAuthEvent('Login Failed', { 
-        email: credentials.email, 
-        error: error.message 
-      })
-      throw error
-    }
-  }
-
+  // Authentication methods
   async signup(userData) {
+    console.log('🔍 SIGNUP STARTING...', { email: userData.email })
     mobileDebugger.logAuthEvent('Signup Started', { email: userData.email })
     try {
       const response = await this.request('/auth/signup', {
@@ -222,8 +219,10 @@ class ApiHelper {
         mobileDebugger.logAuthEvent('Signup Success', { email: userData.email })
       }
       
+      console.log('✅ SIGNUP SUCCESS:', response)
       return response
     } catch (error) {
+      console.log('❌ SIGNUP FAILED:', error)
       mobileDebugger.logAuthEvent('Signup Failed', { 
         email: userData?.email,
         error: error.message 
@@ -232,24 +231,64 @@ class ApiHelper {
     }
   }
 
-  async getCurrentUser() {
+  async login(userData) {
+    console.log('🔍 LOGIN STARTING...', { email: userData.email })
+    mobileDebugger.logAuthEvent('Login Started', { email: userData.email })
     try {
-      const result = await this.request('/auth/me')
-      mobileDebugger.debug('Current user retrieved', { hasData: !!result.data })
-      return result
+      const response = await this.request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(userData),
+      })
+      
+      // Save tokens on successful login
+      if (response.success && response.data) {
+        this.saveToken(response.data.access_token)
+        if (response.data.refresh_token) {
+          localStorage.setItem('refresh_token', response.data.refresh_token)
+        }
+        mobileDebugger.logAuthEvent('Login Success', { email: userData.email })
+      }
+      
+      console.log('✅ LOGIN SUCCESS:', response)
+      return response
     } catch (error) {
-      mobileDebugger.error('Failed to get current user', error)
+      console.log('❌ LOGIN FAILED:', error)
+      mobileDebugger.logAuthEvent('Login Failed', { 
+        email: userData?.email,
+        error: error.message 
+      })
       throw error
     }
   }
 
-  // Logout method
+  async getCurrentUser() {
+    console.log('🔍 GET CURRENT USER STARTING...')
+    try {
+      const result = await this.request('/auth/me')
+      console.log('✅ GET CURRENT USER SUCCESS:', result)
+      return result
+    } catch (error) {
+      console.log('❌ GET CURRENT USER FAILED:', error)
+      throw error
+    }
+  }
+
   async logout() {
-    mobileDebugger.logAuthEvent('Logout Started')
-    this.clearToken()
-    mobileDebugger.logAuthEvent('Logout Success')
-    return { success: true, message: 'Logged out successfully' }
+    console.log('🔍 LOGOUT STARTING...')
+    try {
+      await this.request('/auth/logout', { method: 'POST' })
+      this.clearToken()
+      console.log('✅ LOGOUT SUCCESS')
+      mobileDebugger.logAuthEvent('Logout Success')
+    } catch (error) {
+      console.log('❌ LOGOUT FAILED:', error)
+      // Still clear token even if API call fails
+      this.clearToken()
+      mobileDebugger.logAuthEvent('Logout Failed', { error: error.message })
+    }
   }
 }
 
-export default new ApiHelper()
+// Create and export singleton instance
+const api = new ApiHelper()
+export default api
